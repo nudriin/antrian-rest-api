@@ -3,6 +3,6 @@ import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [CommonModule, UserModule],
+    imports: [CommonModule, UserModule],
 })
 export class AppModule {}

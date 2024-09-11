@@ -31,7 +31,7 @@ export class UserService {
         });
 
         if (totalUser != 0) {
-            throw new HttpException('User is exist', 400);
+            throw new HttpException('user is exist', 400);
         }
 
         validRequest.password = await bcrypt.hash(validRequest.password, 10);
