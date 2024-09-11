@@ -1,0 +1,21 @@
+-- CreateTable
+CREATE TABLE `users` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(225) NOT NULL,
+    `name` VARCHAR(225) NOT NULL,
+    `password` VARCHAR(225) NOT NULL,
+    `role` ENUM('USER', 'SUPER_ADMIN', 'LOCKET_ADMIN') NOT NULL DEFAULT 'USER',
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Queue` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `queue_number` INTEGER NOT NULL,
+    `status` ENUM('DONE', 'UNDONE') NOT NULL DEFAULT 'UNDONE',
+    `updatedAt` DATETIME(3) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
