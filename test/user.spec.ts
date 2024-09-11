@@ -74,4 +74,67 @@ describe('UserController', () => {
             expect(response.body.errors).toBe('user is exist');
         });
     });
+
+    describe('POST /api/users/login', () => {
+        beforeEach(async () => {
+            await testService.deleteSuperAdmin();
+            await testService.createSuperAdmin();
+        });
+
+        it('should reject if request invalid', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: '',
+                    password: '',
+                });
+
+            logger.info(response.body);
+            expect(response.status).toBe(400);
+            expect(response.body.errors).toBeDefined();
+        });
+
+        it('should reject if user not exist', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@false.com',
+                    password: 'test',
+                });
+
+            logger.info(response.body);
+            expect(response.status).toBe(400);
+            expect(response.body.errors).toBeDefined();
+        });
+
+        it('should reject if password is wrong', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'salah',
+                });
+
+            logger.info(response.body);
+            expect(response.status).toBe(400);
+            expect(response.body.errors).toBeDefined();
+        });
+
+        it('should success login user', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'test',
+                });
+
+            logger.info(response.body);
+            expect(response.status).toBe(200);
+            expect(response.body.errors).toBeUndefined();
+            expect(response.body.data.email).toBe('test@superadmin.com');
+            expect(response.body.data.name).toBe('test');
+            expect(response.body.data.token).toBeDefined();
+            logger.info(response.body.data.token);
+        });
+    });
 });

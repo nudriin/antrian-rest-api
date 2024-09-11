@@ -3,9 +3,15 @@ import { ValidationService } from '../common/validation.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { PrismaService } from '../common/prisma.service';
-import { UserRegisterRequest, UserResponse } from '../model/user.model';
+import {
+    UserLoginRequest,
+    UserRegisterRequest,
+    UserResponse,
+} from '../model/user.model';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -13,6 +19,8 @@ export class UserService {
         private validationService: ValidationService,
         @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
         private prismaService: PrismaService,
+        private jwtService: JwtService,
+        private configService: ConfigService,
     ) {}
 
     async register(request: UserRegisterRequest): Promise<UserResponse> {
@@ -43,6 +51,51 @@ export class UserService {
         return {
             email: user.email,
             name: user.name,
+        };
+    }
+
+    async login(request: UserLoginRequest): Promise<UserResponse> {
+        const validRequest: UserLoginRequest = this.validationService.validate(
+            UserValidation.LOGIN,
+            request,
+        ) as UserLoginRequest;
+
+        const user = await this.prismaService.user.findFirst({
+            where: {
+                email: validRequest.email,
+            },
+        });
+
+        if (!user) {
+            throw new HttpException('email or password is wrong', 400);
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+            validRequest.password,
+            user.password,
+        );
+
+        if (!isPasswordValid) {
+            throw new HttpException('email or password is wrong', 400);
+        }
+
+        const token = this.jwtService.sign(
+            {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+            },
+            {
+                expiresIn: '1d',
+                secret: this.configService.get('JWT_SECRET'),
+            },
+        );
+
+        return {
+            email: user.email,
+            name: user.name,
+            token: token,
         };
     }
 }

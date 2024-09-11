@@ -4,6 +4,11 @@ export class UserRegisterRequest {
     name: string;
 }
 
+export class UserLoginRequest {
+    email: string;
+    password: string;
+}
+
 export class UserResponse {
     email: string;
     name: string;

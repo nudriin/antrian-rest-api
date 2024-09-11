@@ -5,6 +5,8 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 
 @Global()
 @Module({
@@ -12,6 +14,12 @@ import { ErrorFilter } from './error.filter';
         WinstonModule.forRoot({
             format: winston.format.json(),
             transports: new winston.transports.Console(),
+        }),
+        JwtModule.register({
+            global: true,
+        }),
+        ConfigModule.forRoot({
+            isGlobal: true,
         }),
     ],
     providers: [

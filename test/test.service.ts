@@ -14,12 +14,31 @@ export class TestService {
         });
     }
 
+    async deleteSuperAdmin() {
+        await this.prismaService.user.deleteMany({
+            where: {
+                email: 'test@superadmin.com',
+            },
+        });
+    }
+
     async createUser() {
         await this.prismaService.user.create({
             data: {
                 email: 'test@test.com',
                 password: await bcrypt.hash('test', 10),
                 name: 'test',
+            },
+        });
+    }
+
+    async createSuperAdmin() {
+        await this.prismaService.user.create({
+            data: {
+                email: 'test@superadmin.com',
+                password: await bcrypt.hash('test', 10),
+                name: 'test',
+                role: 'SUPER_ADMIN',
             },
         });
     }
