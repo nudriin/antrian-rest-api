@@ -35,9 +35,21 @@ model Queue {
   queue_number Int
   status       Status    @default(UNDONE)
   updatedAt    DateTime?
-  locket_name  String    @db.VarChar(225)
+  locket_id    Int
+
+  locket Locket @relation(fields: [locket_id], references: [id])
 
   @@map("queue")
+}
+
+model Locket {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(225)
+  createdAt DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp()
+
+  queue Queue[]
+
+  @@map("lockets")
 }
 
 enum Status {
