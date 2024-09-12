@@ -5,5 +5,5 @@ export class LocketSaveRequest {
 export class LocketResponse {
     id: number;
     name: string;
-    created_at: Date;
+    createdAt: Date;
 }

@@ -42,4 +42,20 @@ export class TestService {
             },
         });
     }
+
+    async createLocket() {
+        await this.prismaService.locket.create({
+            data: {
+                name: 'test',
+            },
+        });
+    }
+
+    async deleteLocket() {
+        await this.prismaService.locket.deleteMany({
+            where: {
+                name: 'test',
+            },
+        });
+    }
 }

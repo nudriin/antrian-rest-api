@@ -29,7 +29,7 @@ export class LocketService {
         });
 
         if (totalLocket != 0) {
-            throw new HttpException('duplicate locket', 400);
+            throw new HttpException('duplicate locket name', 400);
         }
 
         const locket = await this.prismaService.locket.create({
@@ -44,7 +44,19 @@ export class LocketService {
         return {
             id: locket.id,
             name: locket.name,
-            created_at: locket.createdAt,
+            createdAt: locket.createdAt,
         };
+    }
+
+    async findAll(): Promise<LocketResponse[]> {
+        const lockets = await this.prismaService.locket.findMany({
+            select: {
+                id: true,
+                name: true,
+                createdAt: true,
+            },
+        });
+
+        return lockets;
     }
 }
