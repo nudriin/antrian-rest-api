@@ -59,4 +59,32 @@ export class LocketService {
 
         return lockets;
     }
+
+    async findByName(locketName: string): Promise<LocketResponse> {
+        const validRequest: string = this.validationService.validate(
+            LocketValidation.FIND_NAME,
+            locketName,
+        ) as string;
+
+        const lockets = await this.prismaService.locket.findFirst({
+            where: {
+                name: validRequest,
+            },
+            select: {
+                id: true,
+                name: true,
+                createdAt: true,
+            },
+        });
+
+        if (!lockets) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        return {
+            id: lockets.id,
+            name: lockets.name,
+            createdAt: lockets.createdAt,
+        };
+    }
 }

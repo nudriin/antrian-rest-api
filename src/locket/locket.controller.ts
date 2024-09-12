@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { LocketService } from './locket.service';
 import { LocketSaveRequest, LocketResponse } from '../model/locket.model';
 import { WebResponse } from '../model/web.model';
@@ -23,6 +23,18 @@ export class LocketController {
     @HttpCode(200)
     async findAllLocket(): Promise<WebResponse<LocketResponse[]>> {
         const result = await this.locketService.findAll();
+
+        return {
+            data: result,
+        };
+    }
+
+    @Get('/:locketName')
+    @HttpCode(200)
+    async findLocketByName(
+        @Param('locketName') locketName: string,
+    ): Promise<WebResponse<LocketResponse>> {
+        const result = await this.locketService.findByName(locketName);
 
         return {
             data: result,
