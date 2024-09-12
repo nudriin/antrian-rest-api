@@ -1,0 +1,31 @@
+@startuml
+
+entity User {
+    *id : number
+    --
+    *email : string
+    *name : string
+    *role : enum["USER", "LOCKET_ADMIN", "SUPER_ADMIN"], 
+}
+
+entity Locket {
+    *id : number  
+    --    
+    *name : string   
+    *createdAt : DateTime 
+}
+
+entity Queue {
+    *id : number
+    *createdAt : DateTime  
+    *queue_number : number
+    *status : enum["DONE", "UNDONE"] 
+    updatedAt : DateTime?
+    *locket_id : number <FK_LOCKET_ID>
+    user_id : number <FK_USER_ID>
+}
+
+Locket ||----|{ Queue
+User ||----|{ Queue
+
+@enduml
