@@ -35,6 +35,9 @@ model Queue {
   queue_number Int
   status       Status    @default(UNDONE)
   updatedAt    DateTime?
+  locket_name  String    @db.VarChar(225)
+
+  @@map("queue")
 }
 
 enum Status {
