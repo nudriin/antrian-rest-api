@@ -10,6 +10,7 @@ export class UserLoginRequest {
 }
 
 export class UserResponse {
+    id: number;
     email: string;
     name: string;
     token?: string;
