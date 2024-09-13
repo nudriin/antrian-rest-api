@@ -53,6 +53,7 @@ export class UserService {
             id: user.id,
             email: user.email,
             name: user.name,
+            role: user.role,
         };
     }
 
@@ -98,26 +99,17 @@ export class UserService {
             id: user.id,
             email: user.email,
             name: user.name,
+            role: user.role,
             token: token,
         };
     }
 
     async findCurrent(user: User): Promise<UserResponse> {
-        const findUser = await this.prismaService.user.findUnique({
-            where: {
-                id: user.id
-            }, select: {
-                id: true,
-                email:true,
-                name:true
-            }
-        });
-
-        if (!findUser) {
-            throw new HttpException("user not found", 404);
-        }
-
-        return findUser
-
+        return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        };
     }
 }

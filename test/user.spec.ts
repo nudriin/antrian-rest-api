@@ -137,4 +137,33 @@ describe('UserController', () => {
             logger.info(response.body.data.token);
         });
     });
+
+    describe('GET /api/users/current', () => {
+        beforeEach(async () => {
+            await testService.deleteUser();
+            await testService.createUser();
+        });
+
+        it('should success get current user', async () => {
+            let response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@test.com',
+                    password: 'test',
+                });
+
+            const token = response.body.data.token;
+
+            response = await request(app.getHttpServer())
+                .get('/api/users/current')
+                .set('authorization', `Bearer ${token}`);
+
+            logger.info(response.body);
+            expect(response.status).toBe(200);
+            expect(response.body.data.id).toBeDefined();
+            expect(response.body.data.email).toBe('test@test.com');
+            expect(response.body.data.name).toBe('test');
+            expect(response.body.data.role).toBe('USER');
+        });
+    });
 });

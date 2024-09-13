@@ -1,4 +1,4 @@
-@startuml
+@startuml queue_apps
 
 entity User {
     *id : number
