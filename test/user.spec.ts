@@ -156,7 +156,7 @@ describe('UserController', () => {
 
             response = await request(app.getHttpServer())
                 .get('/api/users/current')
-                .set('authorization', `Bearer ${token}`);
+                .set('Authorization', `Bearer ${token}`);
 
             logger.info(response.body);
             expect(response.status).toBe(200);
@@ -164,6 +164,31 @@ describe('UserController', () => {
             expect(response.body.data.email).toBe('test@test.com');
             expect(response.body.data.name).toBe('test');
             expect(response.body.data.role).toBe('USER');
+        });
+        it('should failed if Authorization not set', async () => {
+            const response = await request(app.getHttpServer()).get(
+                '/api/users/current',
+            );
+            logger.info(response.body);
+
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
+        });
+        it('should failed if Authorization wrong', async () => {
+            const response = await request(app.getHttpServer())
+                .get('/api/users/current')
+                .set('Authorization', 'Bearer salah');
+            logger.info(response.body);
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
+        });
+        it('should failed if Authorization blank', async () => {
+            const response = await request(app.getHttpServer())
+                .get('/api/users/current')
+                .set('Authorization', '');
+            logger.info(response.body);
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
         });
     });
 });
