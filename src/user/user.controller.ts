@@ -6,7 +6,7 @@ import {
     UserResponse,
 } from '../model/user.model';
 import { WebResponse } from '../model/web.model';
-import { User as AuthUser } from '../common/user.decorator';
+import { AuthUser } from '../common/auth-user.decorator';
 import { User } from '@prisma/client';
 
 @Controller('/api/users')

@@ -37,10 +37,10 @@ model Queue {
   status       Status    @default(UNDONE)
   updatedAt    DateTime?
   locket_id    Int
-  user_id      Int?
+  user_id      Int
 
   locket Locket @relation(fields: [locket_id], references: [id])
-  user User? @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
 
   @@map("queue")
 }

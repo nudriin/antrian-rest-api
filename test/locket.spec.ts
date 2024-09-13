@@ -6,7 +6,7 @@ import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
-describe('UserController', () => {
+describe('LocketController', () => {
     let app: INestApplication;
     let logger: Logger;
     let testService: TestService;

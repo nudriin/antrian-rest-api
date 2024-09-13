@@ -7,6 +7,17 @@ export class TestService {
     constructor(private prismaService: PrismaService) {}
 
     async deleteUser() {
+        const user = await this.prismaService.user.findFirst({
+            where: {
+                email: 'test@test.com',
+            },
+        });
+
+        await this.prismaService.queue.deleteMany({
+            where: {
+                user_id: user.id,
+            },
+        });
         await this.prismaService.user.deleteMany({
             where: {
                 email: 'test@test.com',
