@@ -17,22 +17,52 @@ export class QueueService {
     ) {}
 
     async countTotalQueueByDateAndLocket(locketId: number): Promise<number> {
+        const validLocketId: number = this.validationService.validate(
+            QueueValidation.GET,
+            locketId,
+        );
+
+        const locketCount = await this.prismaService.locket.count({
+            where: {
+                id: validLocketId,
+            },
+        });
+
+        if (locketCount == 0) {
+            throw new HttpException('locket not found', 404);
+        }
+
         const today = moment().format().slice(0, 10);
         const query = `%${today}%`;
         // * Destructuring array
         const [field] = await this.prismaService.$queryRaw<
             { total: number }[]
-        >`SELECT count(id) as total FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${locketId}`; // * Get total queue by date and locket id
+        >`SELECT count(id) as total FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`; // * Get total queue by date and locket id
         // * access total in array
         return Number(field.total);
     }
 
     async findLastQueueByDateAndLocket(locketId: number): Promise<number> {
+        const validLocketId: number = this.validationService.validate(
+            QueueValidation.GET,
+            locketId,
+        );
+
+        const locketCount = await this.prismaService.locket.count({
+            where: {
+                id: validLocketId,
+            },
+        });
+
+        if (locketCount == 0) {
+            throw new HttpException('locket not found', 404);
+        }
+
         const today = moment().format().slice(0, 10);
         const query = `%${today}%`;
         const [field] = await this.prismaService.$queryRaw<
             { max: number }[]
-        >`SELECT max(queue_number) as max FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${locketId}`; // * Get last added queue_number23
+        >`SELECT max(queue_number) as max FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`; // * Get last added queue_number23
 
         return Number(field.max);
     }

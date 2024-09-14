@@ -24,10 +24,11 @@ describe('QueueController', () => {
         testService = app.get(TestService);
     });
 
+    const lokcet_ids = 1;
     describe('GET /api/queue/:locketId/total', () => {
         it('should success get total queue in locket', async () => {
             const response = await request(app.getHttpServer()).get(
-                '/api/queue/2/total',
+                `/api/queue/${lokcet_ids}/total`,
             );
 
             logger.info(response.body);
@@ -35,6 +36,29 @@ describe('QueueController', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.data.total).toBeDefined();
+        });
+
+        it('should reject get total queue in locket if locketId not exist', async () => {
+            const response = await request(app.getHttpServer()).get(
+                '/api/queue/10/total',
+            );
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBeDefined();
+        });
+        it('should reject get total queue in locket if locketId invalid', async () => {
+            const response = await request(app.getHttpServer()).get(
+                '/api/queue/salah/total',
+            );
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(400);
+            expect(response.body.errors).toBeDefined();
         });
     });
 
@@ -54,7 +78,7 @@ describe('QueueController', () => {
                 .post('/api/queue')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
-                    locket_id: 2,
+                    locket_id: lokcet_ids,
                 });
 
             logger.info(response.body);
@@ -63,7 +87,7 @@ describe('QueueController', () => {
             expect(response.body.data.createdAt).toBeDefined();
             expect(response.body.data.queue_number).toBeDefined();
             expect(response.body.data.status).toBe('UNDONE');
-            expect(response.body.data.locket_id).toBe(2);
+            expect(response.body.data.locket_id).toBe(lokcet_ids);
             expect(response.body.data.user_id).toBeDefined();
         });
 
