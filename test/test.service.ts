@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../src/common/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { Locket, User } from '@prisma/client';
 
 @Injectable()
 export class TestService {
@@ -36,18 +37,20 @@ export class TestService {
         });
     }
 
-    async createUser() {
-        await this.prismaService.user.create({
+    async createUser(): Promise<User> {
+        const user = await this.prismaService.user.create({
             data: {
                 email: 'test@test.com',
                 password: await bcrypt.hash('test', 10),
                 name: 'test',
             },
         });
+
+        return user;
     }
 
-    async createSuperAdmin() {
-        await this.prismaService.user.create({
+    async createSuperAdmin(): Promise<User> {
+        const user = await this.prismaService.user.create({
             data: {
                 email: 'test@superadmin.com',
                 password: await bcrypt.hash('test', 10),
@@ -55,14 +58,18 @@ export class TestService {
                 role: 'SUPER_ADMIN',
             },
         });
+
+        return user;
     }
 
-    async createLocket() {
-        await this.prismaService.locket.create({
+    async createLocket(): Promise<Locket> {
+        const locket = await this.prismaService.locket.create({
             data: {
                 name: 'test',
             },
         });
+
+        return locket;
     }
 
     async deleteLocket() {
