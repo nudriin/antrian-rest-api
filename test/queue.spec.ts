@@ -155,4 +155,18 @@ describe('QueueController', () => {
             expect(response.body.data.nextQueue).toBeDefined();
         });
     });
+
+    describe('GET /api/queue/:locketId/remain', () => {
+        it('should success get remain queue in locket', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/${lokcet_ids}/remain`,
+            );
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.queueRemainder).toBeDefined();
+        });
+    });
 });

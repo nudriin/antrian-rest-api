@@ -76,4 +76,18 @@ export class QueueController {
             },
         };
     }
+
+    @Get('/:locketId/remain')
+    @HttpCode(200)
+    async getRemainQueue(
+        @Param('locketId', ParseIntPipe) locketId: number,
+    ): Promise<WebResponse<QueueAggregateResponse>> {
+        const result = await this.queueService.findRemainderQueue(locketId);
+
+        return {
+            data: {
+                queueRemainder: result,
+            },
+        };
+    }
 }

@@ -166,4 +166,31 @@ export class QueueService {
 
         return nextQueue.queue_number;
     }
+
+    async findRemainderQueue(locketId: number): Promise<number> {
+        this.logger.info(`Find remainder queue on locket ${locketId}`);
+
+        const validLocketId: number = this.validationService.validate(
+            QueueValidation.GET,
+            locketId,
+        );
+
+        const locketCount = await this.prismaService.locket.count({
+            where: {
+                id: validLocketId,
+            },
+        });
+
+        if (locketCount == 0) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        const today = this.datesService.getToday();
+        const query = `%${today}%`;
+        const [field] = await this.prismaService.$queryRaw<
+            { remain: number }[]
+        >`SELECT COUNT(id) as remain FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" `;
+
+        return Number(field.remain);
+    }
 }
