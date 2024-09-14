@@ -140,6 +140,17 @@ describe('QueueController', () => {
             expect(response.status).toBe(200);
             expect(response.body.data.currentQueue).toBeDefined();
         });
+
+        it('should reject get current queue in locket if locket_id not exist', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/999999/current`,
+            );
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBeDefined();
+        });
     });
 
     describe('GET /api/queue/:locketId/next', () => {
@@ -153,6 +164,17 @@ describe('QueueController', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.data.nextQueue).toBeDefined();
+        });
+
+        it('should reject get next queue in locket if locket_id not exist', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/999999/next`,
+            );
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBeDefined();
         });
     });
 
@@ -168,14 +190,35 @@ describe('QueueController', () => {
             expect(response.status).toBe(200);
             expect(response.body.data.queueRemainder).toBeDefined();
         });
+
+        it('should reject get remains queue in locket if locket_id not exist', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/99999/remains`,
+            );
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBeDefined();
+        });
     });
 
     describe('PATCH /api/queue/:queueId', () => {
         const queueId = 9;
         it('should success update queue', async () => {
-            const response = await request(app.getHttpServer()).patch(
-                `/api/queue/${queueId}`,
-            );
+            let response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'test',
+                });
+
+            logger.info(response.body);
+
+            const token = response.body.data.token;
+            response = await request(app.getHttpServer())
+                .patch(`/api/queue/${queueId}`)
+                .set('Authorization', `Bearer ${token}`);
 
             logger.info(response.body);
             console.log(response.body);
@@ -187,6 +230,58 @@ describe('QueueController', () => {
             expect(response.body.data.status).toBe('DONE');
             expect(response.body.data.locket_id).toBeDefined();
             expect(response.body.data.user_id).toBeDefined();
+        });
+
+        it('should reject update queue if user not locket admin or super admin', async () => {
+            let response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@test.com',
+                    password: 'test',
+                });
+
+            logger.info(response.body);
+
+            const token = response.body.data.token;
+            response = await request(app.getHttpServer())
+                .patch(`/api/queue/${queueId}`)
+                .set('Authorization', `Bearer ${token}`);
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(403);
+            expect(response.body.errors).toBe('Forbidden');
+        });
+
+        it('should reject update queue if adminNotLogin', async () => {
+            const response = await request(app.getHttpServer()).patch(
+                `/api/queue/${queueId}`,
+            );
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
+        });
+
+        it('should reject update queue if queue_id is not exist', async () => {
+            let response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'test',
+                });
+
+            logger.info(response.body);
+
+            const token = response.body.data.token;
+            response = await request(app.getHttpServer())
+                .patch(`/api/queue/999999`)
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBe('queue not found');
         });
     });
 });

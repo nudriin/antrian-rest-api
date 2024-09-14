@@ -17,6 +17,7 @@ import {
 } from '../model/queue.model';
 import { AuthUser } from '../common/auth-user.decorator';
 import { User } from '@prisma/client';
+import { LocketAdmin } from '../common/locket-admin.decorator';
 
 @Controller('/api/queue')
 export class QueueController {
@@ -95,6 +96,7 @@ export class QueueController {
     @Patch('/:queueId')
     @HttpCode(200)
     async updateQueue(
+        @LocketAdmin() locketAdmin: User,
         @Param('queueId', ParseIntPipe) queueId: number,
     ): Promise<WebResponse<QueueResponse>> {
         const result = await this.queueService.updateQueue(queueId);
