@@ -193,4 +193,49 @@ export class QueueService {
 
         return Number(field.remain);
     }
+
+    async updateQueue(queueId: number): Promise<QueueResponse> {
+        this.logger.info(`Update queue id : ${queueId}`);
+
+        const validQueueId: number = this.validationService.validate(
+            QueueValidation.GET,
+            queueId,
+        ) as number;
+
+        const queue = await this.prismaService.queue.findFirst({
+            where: {
+                id: BigInt(validQueueId),
+            },
+        });
+
+        if (!queue) {
+            throw new HttpException('queue not found', 404);
+        }
+
+        const updatedDate = this.datesService.getTodayWithTime();
+        const status = 'DONE';
+
+        const response = await this.prismaService.queue.update({
+            where: {
+                id: validQueueId,
+            },
+            data: {
+                updatedAt: updatedDate,
+                status: status,
+            },
+        });
+
+        const parseId: number =
+            typeof response.id === 'bigint' ? Number(response.id) : response.id;
+
+        return {
+            id: parseId,
+            createdAt: response.createdAt,
+            queue_number: response.queue_number,
+            status: response.status,
+            updatedAt: response.updatedAt,
+            locket_id: response.locket_id,
+            user_id: response.user_id,
+        };
+    }
 }

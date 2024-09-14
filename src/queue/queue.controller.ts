@@ -5,6 +5,7 @@ import {
     HttpCode,
     Param,
     ParseIntPipe,
+    Patch,
     Post,
 } from '@nestjs/common';
 import { QueueService } from './queue.service';
@@ -88,6 +89,18 @@ export class QueueController {
             data: {
                 queueRemainder: result,
             },
+        };
+    }
+
+    @Patch('/:queueId')
+    @HttpCode(200)
+    async updateQueue(
+        @Param('queueId', ParseIntPipe) queueId: number,
+    ): Promise<WebResponse<QueueResponse>> {
+        const result = await this.queueService.updateQueue(queueId);
+
+        return {
+            data: result,
         };
     }
 }

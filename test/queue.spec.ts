@@ -169,4 +169,24 @@ describe('QueueController', () => {
             expect(response.body.data.queueRemainder).toBeDefined();
         });
     });
+
+    describe('PATCH /api/queue/:queueId', () => {
+        const queueId = 9;
+        it('should success update queue', async () => {
+            const response = await request(app.getHttpServer()).patch(
+                `/api/queue/${queueId}`,
+            );
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.id).toBeDefined();
+            expect(response.body.data.createdAt).toBeDefined();
+            expect(response.body.data.queue_number).toBeDefined();
+            expect(response.body.data.status).toBe('DONE');
+            expect(response.body.data.locket_id).toBeDefined();
+            expect(response.body.data.user_id).toBeDefined();
+        });
+    });
 });
