@@ -13,10 +13,10 @@ export const LocketAdmin = createParamDecorator(
             throw new HttpException('Unauthorized', 401);
         }
 
-        if (user.role != 'LOCKET_ADMIN' || user.role != 'SUPER_ADMIN') {
+        if (user.role == 'LOCKET_ADMIN' || user.role == 'SUPER_ADMIN') {
+            return user;
+        } else {
             throw new HttpException('Forbidden', 403);
         }
-
-        return user;
     },
 );
