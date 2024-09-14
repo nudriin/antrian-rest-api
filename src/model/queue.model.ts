@@ -12,6 +12,9 @@ export class QueueSaveRequest {
     locket_id: number;
 }
 
-export class QueueTotalLocketResponse {
-    total: number;
+export class QueueAggregateResponse {
+    total?: number;
+    currentQueue?: number;
+    nextQueue?: number;
+    queueRemainder?: number;
 }

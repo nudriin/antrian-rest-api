@@ -127,4 +127,18 @@ describe('QueueController', () => {
             expect(response.body.errors).toBe('Unauthorized');
         });
     });
+
+    describe('GET /api/queue/:locketId/current', () => {
+        it('should success get current queue in locket', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/${lokcet_ids}/current`,
+            );
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.currentQueue).toBeDefined();
+        });
+    });
 });

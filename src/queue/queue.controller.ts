@@ -10,9 +10,9 @@ import {
 import { QueueService } from './queue.service';
 import { WebResponse } from '../model/web.model';
 import {
+    QueueAggregateResponse,
     QueueResponse,
     QueueSaveRequest,
-    QueueTotalLocketResponse,
 } from '../model/queue.model';
 import { AuthUser } from '../common/auth-user.decorator';
 import { User } from '@prisma/client';
@@ -38,14 +38,27 @@ export class QueueController {
     @HttpCode(200)
     async getTotalTodayQueue(
         @Param('locketId', ParseIntPipe) locketId: number,
-    ): Promise<WebResponse<QueueTotalLocketResponse>> {
+    ): Promise<WebResponse<QueueAggregateResponse>> {
         const result =
             await this.queueService.countTotalQueueByDateAndLocket(locketId);
 
-        console.log(`Result= ${result}`);
         return {
             data: {
                 total: Number(result),
+            },
+        };
+    }
+
+    @Get('/:locketId/current')
+    @HttpCode(200)
+    async getCurrentQueue(
+        @Param('locketId', ParseIntPipe) locketId: number,
+    ): Promise<WebResponse<QueueAggregateResponse>> {
+        const result = await this.queueService.findCurrentQueue(locketId);
+
+        return {
+            data: {
+                currentQueue: Number(result),
             },
         };
     }
