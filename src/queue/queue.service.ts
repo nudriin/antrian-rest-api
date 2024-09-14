@@ -139,4 +139,31 @@ export class QueueService {
 
         return currentQueue.queue_number;
     }
+
+    async findNextQueue(locketId: number): Promise<number> {
+        this.logger.info(`Find next queue on locket ${locketId}`);
+
+        const validLocketId: number = this.validationService.validate(
+            QueueValidation.GET,
+            locketId,
+        );
+
+        const locketCount = await this.prismaService.locket.count({
+            where: {
+                id: validLocketId,
+            },
+        });
+
+        if (locketCount == 0) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        const today = this.datesService.getToday();
+        const query = `%${today}%`;
+        const [nextQueue] = await this.prismaService.$queryRaw<
+            { queue_number: number }[]
+        >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" ORDER BY queue_number ASC LIMIT 1`;
+
+        return nextQueue.queue_number;
+    }
 }

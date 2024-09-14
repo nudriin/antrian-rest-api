@@ -58,7 +58,21 @@ export class QueueController {
 
         return {
             data: {
-                currentQueue: Number(result),
+                currentQueue: result,
+            },
+        };
+    }
+
+    @Get('/:locketId/next')
+    @HttpCode(200)
+    async getNextQueue(
+        @Param('locketId', ParseIntPipe) locketId: number,
+    ): Promise<WebResponse<QueueAggregateResponse>> {
+        const result = await this.queueService.findNextQueue(locketId);
+
+        return {
+            data: {
+                nextQueue: result,
             },
         };
     }
