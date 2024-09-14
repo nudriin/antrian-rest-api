@@ -2,11 +2,11 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import * as moment from 'moment';
 import { QueueResponse, QueueSaveRequest } from '../model/queue.model';
 import { ValidationService } from '../common/validation.service';
 import { QueueValidation } from './queue.validation';
 import { User } from '@prisma/client';
+import { DatesService } from '../common/dates.service';
 
 @Injectable()
 export class QueueService {
@@ -14,8 +14,10 @@ export class QueueService {
         private prismaService: PrismaService,
         @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
         private validationService: ValidationService,
+        private datesService: DatesService,
     ) {}
 
+    // * User View
     async countTotalQueueByDateAndLocket(locketId: number): Promise<number> {
         const validLocketId: number = this.validationService.validate(
             QueueValidation.GET,
@@ -32,7 +34,7 @@ export class QueueService {
             throw new HttpException('locket not found', 404);
         }
 
-        const today = moment().format().slice(0, 10);
+        const today = this.datesService.getToday();
         const query = `%${today}%`;
         // * Destructuring array
         const [field] = await this.prismaService.$queryRaw<
@@ -58,7 +60,7 @@ export class QueueService {
             throw new HttpException('locket not found', 404);
         }
 
-        const today = moment().format().slice(0, 10);
+        const today = this.datesService.getToday();
         const query = `%${today}%`;
         const [field] = await this.prismaService.$queryRaw<
             { max: number }[]

@@ -8,6 +8,7 @@ import { ErrorFilter } from './error.filter';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AuthMiddleware } from './auth.middleware';
+import { DatesService } from './dates.service';
 
 @Global()
 @Module({
@@ -26,12 +27,13 @@ import { AuthMiddleware } from './auth.middleware';
     providers: [
         PrismaService,
         ValidationService,
+        DatesService,
         {
             provide: APP_FILTER,
             useClass: ErrorFilter,
         },
     ],
-    exports: [PrismaService, ValidationService],
+    exports: [PrismaService, ValidationService, DatesService],
 })
 export class CommonModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
