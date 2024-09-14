@@ -40,7 +40,7 @@ describe('LocketController', () => {
             expect(response.status).toBe(200);
             expect(response.body.data.id).toBeDefined();
             expect(response.body.data.name).toBe('test');
-            expect(response.body.data.cretedAt).toBeDefined;
+            expect(response.body.data.createdAt).toBeDefined();
         });
 
         it('should reject locket name is duplicate', async () => {
@@ -69,7 +69,37 @@ describe('LocketController', () => {
             expect(response.status).toBe(200);
             expect(response.body.data[0].id).toBeDefined();
             expect(response.body.data[0].name).toBeDefined();
-            expect(response.body.data[0].cretedAt).toBeDefined;
+            expect(response.body.data[0].createdAt).toBeDefined();
+        });
+    });
+
+    describe('GET /api/locket/:lokcetName', () => {
+        beforeEach(async () => {
+            await testService.deleteLocket();
+            await testService.createLocket();
+        });
+        it('should success get locket by name', async () => {
+            const response = await request(app.getHttpServer()).get(
+                '/api/locket/test',
+            );
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.id).toBeDefined();
+            expect(response.body.data.name).toBe('test');
+            expect(response.body.data.createdAt).toBeDefined();
+        });
+
+        it('should success reject get locket by name if name not exist', async () => {
+            const response = await request(app.getHttpServer()).get(
+                '/api/locket/tidak-ada',
+            );
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBe('locket not found');
         });
     });
 });

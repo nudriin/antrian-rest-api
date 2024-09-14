@@ -40,7 +40,7 @@ describe('QueueController', () => {
 
         it('should reject get total queue in locket if locketId not exist', async () => {
             const response = await request(app.getHttpServer()).get(
-                '/api/queue/10/total',
+                '/api/queue/33332/total',
             );
 
             logger.info(response.body);

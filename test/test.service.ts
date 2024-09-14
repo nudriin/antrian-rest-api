@@ -13,11 +13,14 @@ export class TestService {
             },
         });
 
-        await this.prismaService.queue.deleteMany({
-            where: {
-                user_id: user.id,
-            },
-        });
+        if (user) {
+            await this.prismaService.queue.deleteMany({
+                where: {
+                    user_id: user.id,
+                },
+            });
+        }
+
         await this.prismaService.user.deleteMany({
             where: {
                 email: 'test@test.com',

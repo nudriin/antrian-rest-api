@@ -41,11 +41,7 @@ export class LocketService {
             },
         });
 
-        return {
-            id: locket.id,
-            name: locket.name,
-            createdAt: locket.createdAt,
-        };
+        return locket;
     }
 
     async findAll(): Promise<LocketResponse[]> {
@@ -57,6 +53,10 @@ export class LocketService {
             },
         });
 
+        if (!lockets) {
+            throw new HttpException('locket not found', 404);
+        }
+
         return lockets;
     }
 
@@ -66,25 +66,16 @@ export class LocketService {
             locketName,
         ) as string;
 
-        const lockets = await this.prismaService.locket.findFirst({
+        const locket = await this.prismaService.locket.findFirst({
             where: {
                 name: validRequest,
             },
-            select: {
-                id: true,
-                name: true,
-                createdAt: true,
-            },
         });
 
-        if (!lockets) {
+        if (!locket) {
             throw new HttpException('locket not found', 404);
         }
 
-        return {
-            id: lockets.id,
-            name: lockets.name,
-            createdAt: lockets.createdAt,
-        };
+        return locket;
     }
 }
