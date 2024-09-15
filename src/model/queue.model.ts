@@ -18,3 +18,8 @@ export class QueueAggregateResponse {
     nextQueue?: number;
     queueRemainder?: number;
 }
+
+export class QueueTotalResponse {
+    total: number | undefined;
+    locket_id: number | null;
+}

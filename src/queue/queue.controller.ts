@@ -14,6 +14,7 @@ import {
     QueueAggregateResponse,
     QueueResponse,
     QueueSaveRequest,
+    QueueTotalResponse,
 } from '../model/queue.model';
 import { AuthUser } from '../common/auth-user.decorator';
 import { User } from '@prisma/client';
@@ -40,14 +41,12 @@ export class QueueController {
     @HttpCode(200)
     async getTotalTodayQueue(
         @Param('locketId', ParseIntPipe) locketId: number,
-    ): Promise<WebResponse<QueueAggregateResponse>> {
+    ): Promise<WebResponse<QueueTotalResponse>> {
         const result =
             await this.queueService.countTotalQueueByDateAndLocket(locketId);
 
         return {
-            data: {
-                total: Number(result),
-            },
+            data: result,
         };
     }
 

@@ -2,7 +2,11 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { QueueResponse, QueueSaveRequest } from '../model/queue.model';
+import {
+    QueueResponse,
+    QueueSaveRequest,
+    QueueTotalResponse,
+} from '../model/queue.model';
 import { ValidationService } from '../common/validation.service';
 import { QueueValidation } from './queue.validation';
 import { User } from '@prisma/client';
@@ -18,7 +22,9 @@ export class QueueService {
     ) {}
 
     // * User View
-    async countTotalQueueByDateAndLocket(locketId: number): Promise<number> {
+    async countTotalQueueByDateAndLocket(
+        locketId: number,
+    ): Promise<QueueTotalResponse> {
         const validLocketId: number = this.validationService.validate(
             QueueValidation.GET,
             locketId,
@@ -38,10 +44,14 @@ export class QueueService {
         const query = `%${today}%`;
         // * Destructuring array
         const [field] = await this.prismaService.$queryRaw<
-            { total: number }[]
-        >`SELECT count(id) as total FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`; // * Get total queue by date and locket id
+            { total: number | undefined; locket_id: number | null }[]
+        >`SELECT count(id) as total, locket_id FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`; // * Get total queue by date and locket id
         // * access total in array
-        return Number(field.total);
+        console.log(field);
+        return {
+            total: Number(field.total),
+            locket_id: field.locket_id,
+        };
     }
 
     async findLastQueueByDateAndLocket(locketId: number): Promise<number> {
