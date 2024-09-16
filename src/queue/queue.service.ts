@@ -47,7 +47,6 @@ export class QueueService {
             { total: number | undefined; locket_id: number | null }[]
         >`SELECT count(id) as total, locket_id FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`; // * Get total queue by date and locket id
         // * access total in array
-        console.log(field);
         return {
             total: Number(field.total),
             locket_id: field.locket_id,

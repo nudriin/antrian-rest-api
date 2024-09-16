@@ -6,11 +6,13 @@ import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
+import { io, Socket } from 'socket.io-client';
 describe('QueueController', () => {
     let app: INestApplication;
     let logger: Logger;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let testService: TestService;
+    let socket: Socket;
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,6 +24,21 @@ describe('QueueController', () => {
 
         logger = app.get(WINSTON_MODULE_PROVIDER);
         testService = app.get(TestService);
+        // Create a socket.io client instance and connect to the WebSocket server
+        socket = io('http://localhost:5000', {
+            transports: ['websocket'], // Ensure you are using the websocket transport
+        });
+
+        return new Promise<void>((resolve) => {
+            socket.on('connect', () => {
+                console.log('Socket connected');
+                resolve(); // Resolve when the socket is connected
+            });
+        });
+    });
+
+    afterEach(() => {
+        socket.disconnect();
     });
 
     const lokcet_ids = 1;
@@ -282,6 +299,17 @@ describe('QueueController', () => {
 
             expect(response.status).toBe(404);
             expect(response.body.errors).toBe('queue not found');
+        });
+    });
+
+    describe('SOCKET getTotalQueueToday', () => {
+        it('should get total queue in locket', (done) => {
+            socket.emit('getTotalQueue', 4);
+
+            socket.on('total', (data) => {
+                console.log(data);
+                done(); // Signal that the test is complete
+            });
         });
     });
 });
