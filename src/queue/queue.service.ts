@@ -171,11 +171,11 @@ export class QueueService {
 
         const today = this.datesService.getToday();
         const query = `%${today}%`;
-        const [nextQueue] = await this.prismaService.$queryRaw<
-            { queue_number: number }[]
+        const nextQueue = await this.prismaService.$queryRaw<
+            { queue_number: number }[] | []
         >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" AND locket_id = ${validLocketId} ORDER BY queue_number ASC LIMIT 1`;
 
-        return nextQueue.queue_number;
+        return nextQueue.length > 0 ? nextQueue[0].queue_number : 0;
     }
 
     async findRemainderQueue(locketId: number): Promise<number> {
