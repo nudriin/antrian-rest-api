@@ -3,9 +3,9 @@ import { PrismaService } from '../common/prisma.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
+    QueueAggregateResponse,
     QueueResponse,
     QueueSaveRequest,
-    QueueTotalResponse,
 } from '../model/queue.model';
 import { ValidationService } from '../common/validation.service';
 import { QueueValidation } from './queue.validation';
@@ -24,7 +24,7 @@ export class QueueService {
     // * User View
     async countTotalQueueByDateAndLocket(
         locketId: number,
-    ): Promise<QueueTotalResponse> {
+    ): Promise<QueueAggregateResponse> {
         const validLocketId: number = this.validationService.validate(
             QueueValidation.GET,
             locketId,
@@ -124,7 +124,7 @@ export class QueueService {
     }
 
     // * Locket View
-    async findCurrentQueue(locketId: number): Promise<number> {
+    async findCurrentQueue(locketId: number): Promise<QueueAggregateResponse> {
         this.logger.info(`Find current queue of locket ${locketId}`);
         const validLocketId: number = this.validationService.validate(
             QueueValidation.GET,
@@ -148,10 +148,14 @@ export class QueueService {
         >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "DONE" AND locket_id = ${validLocketId} ORDER BY updatedAt DESC LIMIT 1`;
 
         console.log(currentQueue);
-        return currentQueue.length > 0 ? currentQueue[0].queue_number : 0;
+        return {
+            currentQueue:
+                currentQueue.length > 0 ? currentQueue[0].queue_number : 0,
+            locket_id: validLocketId,
+        };
     }
 
-    async findNextQueue(locketId: number): Promise<number> {
+    async findNextQueue(locketId: number): Promise<QueueAggregateResponse> {
         this.logger.info(`Find next queue on locket ${locketId}`);
 
         const validLocketId: number = this.validationService.validate(
@@ -175,10 +179,15 @@ export class QueueService {
             { queue_number: number }[] | []
         >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" AND locket_id = ${validLocketId} ORDER BY queue_number ASC LIMIT 1`;
 
-        return nextQueue.length > 0 ? nextQueue[0].queue_number : 0;
+        return {
+            nextQueue: nextQueue.length > 0 ? nextQueue[0].queue_number : 0,
+            locket_id: validLocketId,
+        };
     }
 
-    async findRemainderQueue(locketId: number): Promise<number> {
+    async findRemainderQueue(
+        locketId: number,
+    ): Promise<QueueAggregateResponse> {
         this.logger.info(`Find remainder queue on locket ${locketId}`);
 
         const validLocketId: number = this.validationService.validate(
@@ -202,7 +211,10 @@ export class QueueService {
             { remain: number }[]
         >`SELECT COUNT(id) as remain FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" AND locket_id = ${validLocketId}`;
 
-        return Number(field.remain);
+        return {
+            queueRemainder: Number(field.remain),
+            locket_id: validLocketId,
+        };
     }
 
     async updateQueue(queueId: number): Promise<QueueResponse> {

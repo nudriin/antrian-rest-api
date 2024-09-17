@@ -17,9 +17,5 @@ export class QueueAggregateResponse {
     currentQueue?: number;
     nextQueue?: number;
     queueRemainder?: number;
-}
-
-export class QueueTotalResponse {
-    total: number | undefined;
-    locket_id: number | null;
+    locket_id: number;
 }
