@@ -53,6 +53,7 @@ export class QueueService {
         };
     }
 
+    // * for save queue
     async findLastQueueByDateAndLocket(locketId: number): Promise<number> {
         const validLocketId: number = this.validationService.validate(
             QueueValidation.GET,
@@ -142,11 +143,12 @@ export class QueueService {
 
         const today = this.datesService.getToday();
         const query = `%${today}%`;
-        const [currentQueue] = await this.prismaService.$queryRaw<
-            { queue_number: number }[]
+        const currentQueue = await this.prismaService.$queryRaw<
+            { queue_number: number }[] | []
         >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "DONE" ORDER BY updatedAt DESC LIMIT 1`;
 
-        return currentQueue.queue_number;
+        console.log(currentQueue);
+        return currentQueue.length > 0 ? currentQueue[0].queue_number : 0;
     }
 
     async findNextQueue(locketId: number): Promise<number> {

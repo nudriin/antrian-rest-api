@@ -5,5 +5,5 @@ export class QueueValidation {
         locket_id: z.coerce.number().min(1),
     });
 
-    static readonly GET = z.number().min(1);
+    static readonly GET = z.coerce.number().min(1);
 }
