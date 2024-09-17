@@ -145,7 +145,7 @@ export class QueueService {
         const query = `%${today}%`;
         const currentQueue = await this.prismaService.$queryRaw<
             { queue_number: number }[] | []
-        >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "DONE" ORDER BY updatedAt DESC LIMIT 1`;
+        >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "DONE" AND locket_id = ${validLocketId} ORDER BY updatedAt DESC LIMIT 1`;
 
         console.log(currentQueue);
         return currentQueue.length > 0 ? currentQueue[0].queue_number : 0;
@@ -173,7 +173,7 @@ export class QueueService {
         const query = `%${today}%`;
         const [nextQueue] = await this.prismaService.$queryRaw<
             { queue_number: number }[]
-        >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" ORDER BY queue_number ASC LIMIT 1`;
+        >`SELECT queue_number FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" AND locket_id = ${validLocketId} ORDER BY queue_number ASC LIMIT 1`;
 
         return nextQueue.queue_number;
     }
@@ -200,7 +200,7 @@ export class QueueService {
         const query = `%${today}%`;
         const [field] = await this.prismaService.$queryRaw<
             { remain: number }[]
-        >`SELECT COUNT(id) as remain FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" `;
+        >`SELECT COUNT(id) as remain FROM queue WHERE createdAt LIKE ${query} AND status = "UNDONE" AND locket_id = ${validLocketId}`;
 
         return Number(field.remain);
     }
