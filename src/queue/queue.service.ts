@@ -249,4 +249,43 @@ export class QueueService {
             user_id: response.user_id,
         };
     }
+
+    async findAllQueue(locketId: number): Promise<QueueResponse[]> {
+        this.logger.info(`Find remainder queue on locket ${locketId}`);
+
+        const validLocketId: number = this.validationService.validate(
+            QueueValidation.GET,
+            locketId,
+        );
+
+        const locketCount = await this.prismaService.locket.count({
+            where: {
+                id: validLocketId,
+            },
+        });
+
+        if (locketCount == 0) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        const today = this.datesService.getToday();
+        const query = `%${today}%`;
+        const queues = await this.prismaService.$queryRaw<
+            QueueResponse[]
+        >`SELECT * FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId} ORDER BY id DESC`;
+
+        if (!queues) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        const filteredQueue = queues.filter((value) => {
+            if (typeof value.id === 'bigint') {
+                value.id = Number(value.id);
+            }
+
+            return value;
+        });
+
+        return filteredQueue;
+    }
 }

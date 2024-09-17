@@ -37,6 +37,18 @@ export class QueueController {
         };
     }
 
+    @Get(':locketId')
+    @HttpCode(200)
+    async findAllQueueByLocket(
+        @Param('locketId', ParseIntPipe) locketId: number,
+    ): Promise<WebResponse<QueueResponse[]>> {
+        const result = await this.queueService.findAllQueue(locketId);
+
+        return {
+            data: result,
+        };
+    }
+
     @Get('/:locketId/total')
     @HttpCode(200)
     async getTotalTodayQueue(

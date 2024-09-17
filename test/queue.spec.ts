@@ -312,4 +312,15 @@ describe('QueueController', () => {
             });
         });
     });
+
+    describe('GET /api/queue/:locketId getAll', () => {
+        const lockeId = 3;
+        it('return all today queues', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/${lockeId}`,
+            );
+
+            console.log(response.body);
+        });
+    });
 });
