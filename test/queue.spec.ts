@@ -314,7 +314,7 @@ describe('QueueController', () => {
     });
 
     describe('SOCKET getCurrentQueueToday', () => {
-        it('should get total queue in locket', (done) => {
+        it('should get current queue in locket', (done) => {
             socket.emit('getCurrentQueue', 3);
 
             socket.on('currentQueue', (data) => {
@@ -325,10 +325,21 @@ describe('QueueController', () => {
     });
 
     describe('SOCKET getRemain', () => {
-        it('should get total queue in locket', (done) => {
+        it('should get remain queue in locket', (done) => {
             socket.emit('getRemainQueue', 3);
 
             socket.on('remainQueue', (data) => {
+                console.log(data);
+                done(); // Signal that the test is complete
+            });
+        }, 10_000);
+    });
+
+    describe('SOCKET getNext', () => {
+        it('should get next queue in locket', (done) => {
+            socket.emit('getNextQueue', 3);
+
+            socket.on('nextQueue', (data) => {
                 console.log(data);
                 done(); // Signal that the test is complete
             });

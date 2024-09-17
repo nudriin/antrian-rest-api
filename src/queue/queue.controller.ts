@@ -37,7 +37,7 @@ export class QueueController {
         };
     }
 
-    @Get(':locketId')
+    @Get('/:locketId')
     @HttpCode(200)
     async findAllQueueByLocket(
         @Param('locketId', ParseIntPipe) locketId: number,
