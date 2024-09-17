@@ -39,4 +39,17 @@ export class QueueGateway implements OnModuleInit {
         console.log('SOCKET IO : ', result);
         this.server.emit('total', result);
     }
+
+    @SubscribeMessage('getCurrentQueue')
+    async currentQueue(
+        @MessageBody() data: number,
+        @ConnectedSocket() client: Socket,
+    ): Promise<void> {
+        const result = await this.queueService.findCurrentQueue(data);
+
+        console.log(client.id);
+        console.log('SOCKET REQUEST : ', data);
+        console.log('SOCKET IO : ', result);
+        this.server.emit('currentQueue', result);
+    }
 }

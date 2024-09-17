@@ -313,6 +313,17 @@ describe('QueueController', () => {
         });
     });
 
+    describe('SOCKET getCurrentQueueToday', () => {
+        it('should get total queue in locket', (done) => {
+            socket.emit('getCurrentQueue', 3);
+
+            socket.on('currentQueue', (data) => {
+                console.log(data);
+                done(); // Signal that the test is complete
+            });
+        }, 10_000);
+    });
+
     describe('GET /api/queue/:locketId getAll', () => {
         const lockeId = 3;
         it('return all today queues', async () => {
