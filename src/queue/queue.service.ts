@@ -43,13 +43,23 @@ export class QueueService {
         const today = this.datesService.getToday();
         const query = `%${today}%`;
         // * Destructuring array
-        const [field] = await this.prismaService.$queryRaw<
+        const field = await this.prismaService.$queryRaw<
             { total: number | undefined; locket_id: number | null }[]
-        >`SELECT count(id) as total, locket_id FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`; // * Get total queue by date and locket id
-        // * access total in array
+        >`SELECT count(id) as total, locket_id FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId} GROUP BY locket_id`; // * Get total queue by date and locket id
+        // * access total in array'
+
+        console.log(field);
+
+        if (field.length === 0) {
+            return {
+                total: 0,
+                locket_id: 0,
+            };
+        }
+
         return {
-            total: Number(field.total),
-            locket_id: field.locket_id,
+            total: Number(field[0].total),
+            locket_id: field[0].locket_id,
         };
     }
 
