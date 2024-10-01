@@ -152,4 +152,66 @@ describe('LocketController', () => {
             expect(response.body.errors).toBe('Unauthorized');
         });
     });
+
+    describe('PATCH /api/locket/:locketId', () => {
+        let locket: Locket;
+        let token: string;
+        beforeEach(async () => {
+            await testService.deleteLocket();
+            locket = await testService.createLocket();
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'test',
+                });
+
+            token = response.body.data.token;
+        });
+        it('should success update locket by id', async () => {
+            const name = 'Loket Baru';
+            const response = await request(app.getHttpServer())
+                .patch(`/api/locket/${locket.id}`)
+                .set('Authorization', `Bearer ${token}`)
+                .send({
+                    name: name,
+                });
+
+            logger.info(response.body);
+            console.log(response.body);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data.id).toBeDefined();
+            expect(response.body.data.name).toBe(name);
+            expect(response.body.data.createdAt).toBeDefined();
+        });
+
+        it('should success reject update locket if id not exist', async () => {
+            const response = await request(app.getHttpServer())
+                .patch(`/api/locket/${locket.id + 3}`)
+                .set('Authorization', `Bearer ${token}`)
+                .send({
+                    name: 'test baru',
+                });
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBe('locket not found');
+        });
+
+        it('should success reject update locket if user not login', async () => {
+            const response = await request(app.getHttpServer())
+                .patch(`/api/locket/${locket.id + 2}`)
+                .set('Authorization', `Bearer ${token + 'Salah'}`)
+                .send({
+                    name: 'test baru',
+                });
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
+        });
+    });
 });

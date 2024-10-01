@@ -79,7 +79,7 @@ export class LocketService {
         return locket;
     }
 
-    async deleteLocket(locketId: number) {
+    async delete(locketId: number) {
         const validId: number = this.validationService.validate(
             LocketValidation.FIND_ID,
             locketId,
@@ -108,5 +108,41 @@ export class LocketService {
         });
 
         return;
+    }
+
+    async update(
+        locketId: number,
+        request: LocketSaveRequest,
+    ): Promise<LocketResponse> {
+        const validId: number = this.validationService.validate(
+            LocketValidation.FIND_ID,
+            locketId,
+        ) as number;
+
+        const validRequest: LocketSaveRequest = this.validationService.validate(
+            LocketValidation.SAVE,
+            request,
+        ) as LocketSaveRequest;
+
+        const locket = await this.prismaService.locket.findUnique({
+            where: {
+                id: validId,
+            },
+        });
+
+        if (!locket) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        const updatedLocket = await this.prismaService.locket.update({
+            where: {
+                id: locket.id,
+            },
+            data: {
+                name: validRequest.name,
+            },
+        });
+
+        return updatedLocket;
     }
 }

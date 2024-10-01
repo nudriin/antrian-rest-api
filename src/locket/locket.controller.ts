@@ -7,6 +7,7 @@ import {
     HttpCode,
     Param,
     ParseIntPipe,
+    Patch,
     Post,
 } from '@nestjs/common';
 import { LocketService } from './locket.service';
@@ -59,10 +60,24 @@ export class LocketController {
         @Param('locketId', ParseIntPipe) locketId: number,
         @SuperAdmin() user: User,
     ): Promise<WebResponse<string>> {
-        await this.locketService.deleteLocket(locketId);
+        await this.locketService.delete(locketId);
 
         return {
             data: 'OK',
+        };
+    }
+
+    @Patch('/:locketId')
+    @HttpCode(200)
+    async updateLocketById(
+        @SuperAdmin() user: User,
+        @Param('locketId', ParseIntPipe) locketId: number,
+        @Body() request: LocketSaveRequest,
+    ): Promise<WebResponse<LocketResponse>> {
+        const result = await this.locketService.update(locketId, request);
+
+        return {
+            data: result,
         };
     }
 }
