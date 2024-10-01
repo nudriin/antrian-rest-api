@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
+import { Locket } from '@prisma/client';
 describe('LocketController', () => {
     let app: INestApplication;
     let logger: Logger;
@@ -73,7 +74,7 @@ describe('LocketController', () => {
         });
     });
 
-    describe('GET /api/locket/:lokcetName', () => {
+    describe('GET /api/locket/:locketId', () => {
         beforeEach(async () => {
             await testService.deleteLocket();
             await testService.createLocket();
@@ -100,6 +101,55 @@ describe('LocketController', () => {
 
             expect(response.status).toBe(404);
             expect(response.body.errors).toBe('locket not found');
+        });
+    });
+
+    describe('DELETE /api/locket/:locketId', () => {
+        let locket: Locket;
+        let token: string;
+        beforeEach(async () => {
+            await testService.deleteLocket();
+            locket = await testService.createLocket();
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'test',
+                });
+
+            token = response.body.data.token;
+        });
+        it('should success delete locket by id', async () => {
+            const response = await request(app.getHttpServer())
+                .delete(`/api/locket/${locket.id}`)
+                .set('Authorization', `Bearer ${token}`);
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(200);
+            expect(response.body.data).toBe('OK');
+        });
+
+        it('should success reject delete locket if id not exist', async () => {
+            const response = await request(app.getHttpServer())
+                .delete(`/api/locket/${locket.id + 2}`)
+                .set('Authorization', `Bearer ${token}`);
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(404);
+            expect(response.body.errors).toBe('locket not found');
+        });
+
+        it('should success reject delete locket if user not login', async () => {
+            const response = await request(app.getHttpServer())
+                .delete(`/api/locket/${locket.id + 2}`)
+                .set('Authorization', `Bearer ${token + 'Salah'}`);
+
+            logger.info(response.body);
+
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
         });
     });
 });

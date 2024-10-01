@@ -78,4 +78,35 @@ export class LocketService {
 
         return locket;
     }
+
+    async deleteLocket(locketId: number) {
+        const validId: number = this.validationService.validate(
+            LocketValidation.FIND_ID,
+            locketId,
+        ) as number;
+
+        const locket = await this.prismaService.locket.findUnique({
+            where: {
+                id: validId,
+            },
+        });
+
+        if (!locket) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        await this.prismaService.queue.deleteMany({
+            where: {
+                locket_id: validId,
+            },
+        });
+
+        await this.prismaService.locket.delete({
+            where: {
+                id: validId,
+            },
+        });
+
+        return;
+    }
 }

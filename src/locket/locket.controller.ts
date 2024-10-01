@@ -1,7 +1,19 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    Param,
+    ParseIntPipe,
+    Post,
+} from '@nestjs/common';
 import { LocketService } from './locket.service';
 import { LocketSaveRequest, LocketResponse } from '../model/locket.model';
 import { WebResponse } from '../model/web.model';
+import { SuperAdmin } from '../common/super-admin.decorator';
+import { User } from '@prisma/client';
 
 @Controller('/api/locket')
 export class LocketController {
@@ -38,6 +50,19 @@ export class LocketController {
 
         return {
             data: result,
+        };
+    }
+
+    @Delete('/:locketId')
+    @HttpCode(200)
+    async deleteLocketById(
+        @Param('locketId', ParseIntPipe) locketId: number,
+        @SuperAdmin() user: User,
+    ): Promise<WebResponse<string>> {
+        await this.locketService.deleteLocket(locketId);
+
+        return {
+            data: 'OK',
         };
     }
 }

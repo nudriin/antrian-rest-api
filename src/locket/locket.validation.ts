@@ -5,4 +5,5 @@ export class LocketValidation {
         name: z.string().min(1).max(225),
     });
     static readonly FIND_NAME = z.string().min(1).max(225);
+    static readonly FIND_ID = z.number().min(1);
 }
