@@ -382,4 +382,15 @@ describe('QueueController', () => {
             expect(response.body.data.totalSemester).toBeDefined();
         });
     });
+
+    describe('GET /api/queue/all/daily-queue-last-mounth', () => {
+        it('get all total daily queue in last mounth queues', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/all/daily-queue-last-mounth`,
+            );
+
+            console.log(response.body);
+            expect(response.status).toBe(200);
+        });
+    });
 });

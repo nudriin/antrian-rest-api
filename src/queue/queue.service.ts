@@ -20,6 +20,7 @@ import {
     startOfMonth,
     endOfMonth,
     subMonths,
+    subDays,
 } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
@@ -402,5 +403,30 @@ export class QueueService {
             totalMonth,
             totalSemester,
         };
+    }
+
+    // Mendapatkan jumlah antrian per hari untuk 30 hari terakhir
+    async findDailyQueueCountLastMonth(): Promise<any[]> {
+        const endDate = new Date();
+        const startDate = subDays(endDate, 30);
+        // Menggunakan raw SQL query untuk mengambil data per hari
+        const data = await this.prismaService.$queryRaw<
+            { date: Date | undefined; count: bigint | null }[]
+        >`
+        SELECT DATE(createdAt) as date, COUNT(*) as count
+        FROM queue
+        WHERE createdAt >= ${startDate} AND createdAt <= ${endDate}
+        GROUP BY DATE(createdAt)
+        ORDER BY date ASC
+        `;
+
+        const mappedData = data.map((value) => {
+            return {
+                date: value.date,
+                count: Number(value.count),
+            };
+        });
+
+        return mappedData;
     }
 }

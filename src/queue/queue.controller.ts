@@ -120,4 +120,14 @@ export class QueueController {
             data: result,
         };
     }
+
+    @Get('/all/daily-queue-last-mounth')
+    @HttpCode(200)
+    async getDailyQueueCountLastMonth(): Promise<WebResponse<any[]>> {
+        const result = await this.queueService.findDailyQueueCountLastMonth();
+
+        return {
+            data: result,
+        };
+    }
 }
