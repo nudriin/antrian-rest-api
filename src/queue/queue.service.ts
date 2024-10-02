@@ -429,4 +429,24 @@ export class QueueService {
 
         return mappedData;
     }
+
+    async findQueueDistributionByLocket(): Promise<any[]> {
+        const data = await this.prismaService.$queryRaw<
+            { locket: string | undefined; count: bigint | null }[]
+        >`
+        SELECT lk.name as locket, COUNT(que.queue_number) as count
+        FROM queue as que
+        JOIN lockets as lk ON (lk.id = que.locket_id)
+        GROUP by locket
+        `;
+
+        const mappedData = data.map((value) => {
+            return {
+                locket: value.locket,
+                count: Number(value.count),
+            };
+        });
+
+        return mappedData;
+    }
 }

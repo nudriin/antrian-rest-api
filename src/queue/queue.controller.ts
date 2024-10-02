@@ -130,4 +130,14 @@ export class QueueController {
             data: result,
         };
     }
+
+    @Get('/all/queue-distribution-locket')
+    @HttpCode(200)
+    async getQueueDistributionByLocket(): Promise<WebResponse<any[]>> {
+        const result = await this.queueService.findQueueDistributionByLocket();
+
+        return {
+            data: result,
+        };
+    }
 }

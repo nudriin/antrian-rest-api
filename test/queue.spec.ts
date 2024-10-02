@@ -393,4 +393,15 @@ describe('QueueController', () => {
             expect(response.status).toBe(200);
         });
     });
+
+    describe('GET /api/queue/all/queue-distribution-locket', () => {
+        it('get all queue distribution in locket', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/all/queue-distribution-locket`,
+            );
+
+            console.log(response.body);
+            expect(response.status).toBe(200);
+        });
+    });
 });
