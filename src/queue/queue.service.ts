@@ -6,20 +6,36 @@ import {
     QueueAggregateResponse,
     QueueResponse,
     QueueSaveRequest,
+    QueueTotalStats,
 } from '../model/queue.model';
 import { ValidationService } from '../common/validation.service';
 import { QueueValidation } from './queue.validation';
 import { User } from '@prisma/client';
 import { DatesService } from '../common/dates.service';
+import {
+    startOfDay,
+    endOfDay,
+    startOfWeek,
+    endOfWeek,
+    startOfMonth,
+    endOfMonth,
+    subMonths,
+} from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 @Injectable()
 export class QueueService {
+    private timeZone = 'Asia/Jakarta'; // Sesuaikan dengan zona waktu Anda
     constructor(
         private prismaService: PrismaService,
         @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
         private validationService: ValidationService,
         private datesService: DatesService,
     ) {}
+
+    private getZonedDate(): Date {
+        return toZonedTime(new Date(), this.timeZone);
+    }
 
     // * User View
     async countTotalQueueByDateAndLocket(
@@ -309,5 +325,82 @@ export class QueueService {
         });
 
         return filteredQueue;
+    }
+
+    async findAllQueueToday(): Promise<number> {
+        const now = this.getZonedDate();
+        const todayStart = startOfDay(now);
+        const todayEnd = endOfDay(now);
+
+        return this.prismaService.queue.count({
+            where: {
+                createdAt: {
+                    gte: todayStart,
+                    lte: todayEnd,
+                },
+            },
+        });
+    }
+
+    async findAllQueueThisWeek(): Promise<number> {
+        const now = this.getZonedDate();
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // Mulai dari Senin
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+        return this.prismaService.queue.count({
+            where: {
+                createdAt: {
+                    gte: weekStart,
+                    lte: weekEnd,
+                },
+            },
+        });
+    }
+
+    async findAllQueueThisMonth(): Promise<number> {
+        const now = this.getZonedDate();
+        const monthStart = startOfMonth(now);
+        const monthEnd = endOfMonth(now);
+
+        return this.prismaService.queue.count({
+            where: {
+                createdAt: {
+                    gte: monthStart,
+                    lte: monthEnd,
+                },
+            },
+        });
+    }
+
+    async findAllQueueThisSemester(): Promise<number> {
+        const now = this.getZonedDate();
+        const semesterEnd = now;
+        const semesterStart = subMonths(semesterEnd, 6);
+
+        return this.prismaService.queue.count({
+            where: {
+                createdAt: {
+                    gte: semesterStart,
+                    lte: semesterEnd,
+                },
+            },
+        });
+    }
+
+    async findQueueStatistics(): Promise<QueueTotalStats> {
+        const [totalToday, totalWeek, totalMonth, totalSemester] =
+            await Promise.all([
+                this.findAllQueueToday(),
+                this.findAllQueueThisWeek(),
+                this.findAllQueueThisMonth(),
+                this.findAllQueueThisSemester(),
+            ]);
+
+        return {
+            totalToday,
+            totalWeek,
+            totalMonth,
+            totalSemester,
+        };
     }
 }

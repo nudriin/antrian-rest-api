@@ -14,6 +14,7 @@ import {
     QueueAggregateResponse,
     QueueResponse,
     QueueSaveRequest,
+    QueueTotalStats,
 } from '../model/queue.model';
 import { AuthUser } from '../common/auth-user.decorator';
 import { User } from '@prisma/client';
@@ -36,7 +37,7 @@ export class QueueController {
         };
     }
 
-    @Get('/:locketId')
+    @Get('/locket/:locketId')
     @HttpCode(200)
     async findAllQueueByLocket(
         @Param('locketId', ParseIntPipe) locketId: number,
@@ -48,7 +49,7 @@ export class QueueController {
         };
     }
 
-    @Get('/:locketId/total')
+    @Get('/locket/:locketId/total')
     @HttpCode(200)
     async getTotalTodayQueue(
         @Param('locketId', ParseIntPipe) locketId: number,
@@ -61,7 +62,7 @@ export class QueueController {
         };
     }
 
-    @Get('/:locketId/current')
+    @Get('/locket/:locketId/current')
     @HttpCode(200)
     async getCurrentQueue(
         @Param('locketId', ParseIntPipe) locketId: number,
@@ -73,7 +74,7 @@ export class QueueController {
         };
     }
 
-    @Get('/:locketId/next')
+    @Get('/locket/:locketId/next')
     @HttpCode(200)
     async getNextQueue(
         @Param('locketId', ParseIntPipe) locketId: number,
@@ -85,7 +86,7 @@ export class QueueController {
         };
     }
 
-    @Get('/:locketId/remain')
+    @Get('/locket/:locketId/remain')
     @HttpCode(200)
     async getRemainQueue(
         @Param('locketId', ParseIntPipe) locketId: number,
@@ -104,6 +105,16 @@ export class QueueController {
         @Param('queueId', ParseIntPipe) queueId: number,
     ): Promise<WebResponse<QueueResponse>> {
         const result = await this.queueService.updateQueue(queueId);
+
+        return {
+            data: result,
+        };
+    }
+
+    @Get('/all/statistics')
+    @HttpCode(200)
+    async getAllTotalTodayQueue(): Promise<WebResponse<QueueTotalStats>> {
+        const result = await this.queueService.findQueueStatistics();
 
         return {
             data: result,

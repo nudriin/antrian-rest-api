@@ -19,3 +19,10 @@ export class QueueAggregateResponse {
     queueRemainder?: number;
     locket_id: number;
 }
+
+export class QueueTotalStats {
+    totalToday?: number;
+    totalWeek?: number;
+    totalMonth?: number;
+    totalSemester?: number;
+}

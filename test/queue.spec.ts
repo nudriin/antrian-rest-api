@@ -42,10 +42,10 @@ describe('QueueController', () => {
     });
 
     const lokcet_ids = 1;
-    describe('GET /api/queue/:locketId/total', () => {
+    describe('GET /api/queue/locket/:locketId/total', () => {
         it('should success get total queue in locket', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/${lokcet_ids}/total`,
+                `/api/queue/locket/${lokcet_ids}/total`,
             );
 
             logger.info(response.body);
@@ -57,7 +57,7 @@ describe('QueueController', () => {
 
         it('should reject get total queue in locket if locketId not exist', async () => {
             const response = await request(app.getHttpServer()).get(
-                '/api/queue/33332/total',
+                '/api/queue/locket/33332/total',
             );
 
             logger.info(response.body);
@@ -68,7 +68,7 @@ describe('QueueController', () => {
         });
         it('should reject get total queue in locket if locketId invalid', async () => {
             const response = await request(app.getHttpServer()).get(
-                '/api/queue/salah/total',
+                '/api/queue/locket/salah/total',
             );
 
             logger.info(response.body);
@@ -145,10 +145,10 @@ describe('QueueController', () => {
         });
     });
 
-    describe('GET /api/queue/:locketId/current', () => {
+    describe('GET /api/queue/locket/:locketId/current', () => {
         it('should success get current queue in locket', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/${lokcet_ids}/current`,
+                `/api/queue/locket/${lokcet_ids}/current`,
             );
 
             logger.info(response.body);
@@ -160,7 +160,7 @@ describe('QueueController', () => {
 
         it('should reject get current queue in locket if locket_id not exist', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/999999/current`,
+                `/api/queue/locket/999999/current`,
             );
 
             logger.info(response.body);
@@ -170,10 +170,10 @@ describe('QueueController', () => {
         });
     });
 
-    describe('GET /api/queue/:locketId/next', () => {
+    describe('GET /api/queue/locket/:locketId/next', () => {
         it('should success get next queue in locket', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/${lokcet_ids}/next`,
+                `/api/queue/locket/${lokcet_ids}/next`,
             );
 
             logger.info(response.body);
@@ -185,7 +185,7 @@ describe('QueueController', () => {
 
         it('should reject get next queue in locket if locket_id not exist', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/999999/next`,
+                `/api/queue/locket/999999/next`,
             );
 
             logger.info(response.body);
@@ -195,10 +195,10 @@ describe('QueueController', () => {
         });
     });
 
-    describe('GET /api/queue/:locketId/remain', () => {
+    describe('GET /api/queue/locket/:locketId/remain', () => {
         it('should success get remain queue in locket', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/${lokcet_ids}/remain`,
+                `/api/queue/locket/${lokcet_ids}/remain`,
             );
 
             logger.info(response.body);
@@ -210,7 +210,7 @@ describe('QueueController', () => {
 
         it('should reject get remains queue in locket if locket_id not exist', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/99999/remains`,
+                `/api/queue/locket/99999/remains`,
             );
 
             logger.info(response.body);
@@ -220,7 +220,7 @@ describe('QueueController', () => {
         });
     });
 
-    describe('PATCH /api/queue/:queueId', () => {
+    describe('PATCH /api/queue/locket/:queueId', () => {
         const queueId = 9;
         it('should success update queue', async () => {
             let response = await request(app.getHttpServer())
@@ -234,7 +234,7 @@ describe('QueueController', () => {
 
             const token = response.body.data.token;
             response = await request(app.getHttpServer())
-                .patch(`/api/queue/${queueId}`)
+                .patch(`/api/queue/locket/${queueId}`)
                 .set('Authorization', `Bearer ${token}`);
 
             logger.info(response.body);
@@ -261,7 +261,7 @@ describe('QueueController', () => {
 
             const token = response.body.data.token;
             response = await request(app.getHttpServer())
-                .patch(`/api/queue/${queueId}`)
+                .patch(`/api/queue/locket/${queueId}`)
                 .set('Authorization', `Bearer ${token}`);
 
             logger.info(response.body);
@@ -273,7 +273,7 @@ describe('QueueController', () => {
 
         it('should reject update queue if adminNotLogin', async () => {
             const response = await request(app.getHttpServer()).patch(
-                `/api/queue/${queueId}`,
+                `/api/queue/locket/${queueId}`,
             );
 
             logger.info(response.body);
@@ -294,7 +294,7 @@ describe('QueueController', () => {
 
             const token = response.body.data.token;
             response = await request(app.getHttpServer())
-                .patch(`/api/queue/999999`)
+                .patch(`/api/queue/locket/999999`)
                 .set('Authorization', `Bearer ${token}`);
 
             expect(response.status).toBe(404);
@@ -357,14 +357,29 @@ describe('QueueController', () => {
         }, 10_000);
     });
 
-    describe('GET /api/queue/:locketId getAll', () => {
+    describe('GET /api/queue/locket/:locketId getAll', () => {
         const lockeId = 3;
         it('return all today queues', async () => {
             const response = await request(app.getHttpServer()).get(
-                `/api/queue/${lockeId}`,
+                `/api/queue/locket/${lockeId}`,
             );
 
             console.log(response.body);
+        });
+    });
+
+    describe('GET /api/queue/all/statistics', () => {
+        it('get all total statistics queues', async () => {
+            const response = await request(app.getHttpServer()).get(
+                `/api/queue/all/statistics`,
+            );
+
+            console.log(response.body);
+            expect(response.status).toBe(200);
+            expect(response.body.data.totalToday).toBeDefined();
+            expect(response.body.data.totalWeek).toBeDefined();
+            expect(response.body.data.totalMonth).toBeDefined();
+            expect(response.body.data.totalSemester).toBeDefined();
         });
     });
 });
