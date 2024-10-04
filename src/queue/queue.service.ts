@@ -15,8 +15,6 @@ import { QueueValidation } from './queue.validation';
 import { User } from '@prisma/client';
 import { DatesService } from '../common/dates.service';
 import {
-    startOfDay,
-    endOfDay,
     startOfWeek,
     endOfWeek,
     startOfMonth,
@@ -331,18 +329,21 @@ export class QueueService {
     }
 
     async findAllQueueToday(): Promise<number> {
-        const now = this.getZonedDate();
-        const todayStart = startOfDay(now);
-        const todayEnd = endOfDay(now);
+        const today = this.datesService.getToday();
+        const query = `%${today}%`;
+        // * Destructuring array
+        const field = await this.prismaService.$queryRaw<
+            { total: number | undefined }[]
+        >`SELECT count(id) as total FROM queue WHERE createdAt LIKE ${query}`; // * Get total queue by date and locket id
+        // * access total in array'
 
-        return this.prismaService.queue.count({
-            where: {
-                createdAt: {
-                    gte: todayStart,
-                    lte: todayEnd,
-                },
-            },
-        });
+        console.log(field);
+
+        if (field.length === 0) {
+            return 0;
+        }
+
+        return Number(field[0].total);
     }
 
     async findAllQueueThisWeek(): Promise<number> {
