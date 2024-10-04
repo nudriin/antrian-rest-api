@@ -12,8 +12,10 @@ import { QueueService } from './queue.service';
 import { WebResponse } from '../model/web.model';
 import {
     QueueAggregateResponse,
+    QueueDistributionByLocket,
     QueueResponse,
     QueueSaveRequest,
+    QueueStatsByLocketLastMonth,
     QueueTotalStats,
 } from '../model/queue.model';
 import { AuthUser } from '../common/auth-user.decorator';
@@ -133,8 +135,23 @@ export class QueueController {
 
     @Get('/all/queue-distribution-locket')
     @HttpCode(200)
-    async getQueueDistributionByLocket(): Promise<WebResponse<any[]>> {
+    async getQueueDistributionByLocket(): Promise<
+        WebResponse<QueueDistributionByLocket[]>
+    > {
         const result = await this.queueService.findQueueDistributionByLocket();
+
+        return {
+            data: result,
+        };
+    }
+
+    @Get('/all/queue-stats-last-month')
+    @HttpCode(200)
+    async getDailyQueueCountByLocketLastMonth(): Promise<
+        WebResponse<QueueStatsByLocketLastMonth>
+    > {
+        const result =
+            await this.queueService.findDailyQueueCountByLocketLastMonth();
 
         return {
             data: result,

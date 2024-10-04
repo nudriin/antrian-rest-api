@@ -26,3 +26,14 @@ export class QueueTotalStats {
     totalMonth?: number;
     totalSemester?: number;
 }
+
+export class QueueDistributionByLocket {
+    locket: string;
+    count: number;
+}
+
+export class QueueStatsByLocketLastMonth {
+    [key: string]: {
+        [date: string]: number;
+    };
+}

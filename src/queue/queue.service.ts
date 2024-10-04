@@ -4,8 +4,10 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
     QueueAggregateResponse,
+    QueueDistributionByLocket,
     QueueResponse,
     QueueSaveRequest,
+    QueueStatsByLocketLastMonth,
     QueueTotalStats,
 } from '../model/queue.model';
 import { ValidationService } from '../common/validation.service';
@@ -430,7 +432,9 @@ export class QueueService {
         return mappedData;
     }
 
-    async findQueueDistributionByLocket(): Promise<any[]> {
+    async findQueueDistributionByLocket(): Promise<
+        QueueDistributionByLocket[]
+    > {
         const data = await this.prismaService.$queryRaw<
             { locket: string | undefined; count: bigint | null }[]
         >`
@@ -446,6 +450,35 @@ export class QueueService {
                 count: Number(value.count),
             };
         });
+
+        return mappedData;
+    }
+
+    async findDailyQueueCountByLocketLastMonth(): Promise<QueueStatsByLocketLastMonth> {
+        const endDate = new Date();
+        const startDate = subMonths(endDate, 1);
+
+        const data = await this.prismaService.$queryRaw<
+            {
+                locket: string | undefined;
+                date: Date | undefined;
+                count: bigint | null;
+            }[]
+        >`
+            SELECT lk.name AS locket, DATE(que.createdAt) AS date, COUNT(*) AS count
+            FROM queue AS que
+            JOIN lockets AS lk ON (lk.id = que.locket_id)
+            WHERE que.createdAt >= ${startDate} AND que.createdAt < ${endDate}
+            GROUP BY locket, DATE(que.createdAt)
+            ORDER BY locket, date ASC
+        `;
+
+        const mappedData = data.reduce((acc, curr) => {
+            const locketName = curr.locket || 'Unknown Locket'; // Handle missing locket names
+            acc[locketName] = acc[locketName] || {};
+            acc[locketName][curr.date.toISOString()] = Number(curr.count); // Use 'id-ID' locale for consistent date formatting
+            return acc;
+        }, {});
 
         return mappedData;
     }
