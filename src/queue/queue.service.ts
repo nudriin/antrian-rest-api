@@ -23,6 +23,11 @@ import {
     subDays,
 } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import * as XLSX from 'xlsx';
+import * as path from 'path';
+import * as fs from 'fs';
+import { EmailService } from '../common/email.service';
 
 @Injectable()
 export class QueueService {
@@ -32,6 +37,7 @@ export class QueueService {
         @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
         private validationService: ValidationService,
         private datesService: DatesService,
+        private emailService: EmailService,
     ) {}
 
     private getZonedDate(): Date {
@@ -482,5 +488,86 @@ export class QueueService {
         }, {});
 
         return mappedData;
+    }
+
+    // @Cron('*/1 * * * *') // every 1 minutes
+    @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+    async autoExportDailyQueueCountByLocketLastMonth() {
+        const data: QueueStatsByLocketLastMonth =
+            await this.findDailyQueueCountByLocketLastMonth();
+        try {
+            const allDates = new Set<string>();
+            Object.values(data).forEach((departmentData) => {
+                Object.keys(departmentData).forEach((date) =>
+                    allDates.add(date),
+                );
+            });
+
+            const sortedDates = Array.from(allDates).sort();
+
+            const worksheetData = [];
+
+            const departments = Object.keys(data);
+            worksheetData.push(['Tanggal', ...departments]);
+
+            sortedDates.forEach((date) => {
+                const row = [this.formatDate(date)];
+                departments.forEach((dept) => {
+                    row.push((data[dept][date] || 0).toString());
+                });
+                worksheetData.push(row);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+
+            const colWidths = [15]; // Lebar untuk kolom tanggal
+            departments.forEach(() => colWidths.push(10)); // Lebar untuk setiap departemen
+            ws['!cols'] = colWidths.map((width) => ({ width }));
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Queue Report');
+
+            const tempDir = path.join(process.cwd(), 'temp');
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir);
+            }
+
+            const fileName = `queue-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+            const filePath = path.join(tempDir, fileName);
+            XLSX.writeFile(wb, filePath);
+
+            const admins = await this.prismaService.user.findMany({
+                where: {
+                    role: 'SUPER_ADMIN',
+                },
+                select: {
+                    email: true,
+                },
+            });
+
+            if (admins.length !== 0) {
+                // throw new Error('No super admin found in the system');
+                const adminEmails = admins.map((admin) => admin.email);
+
+                // Send the email
+                //!  Send email
+                await this.emailService.sendReportEmail(adminEmails, filePath);
+            }
+
+            fs.unlinkSync(filePath);
+
+            this.logger.info('Report generated and sent successfully');
+        } catch (error) {
+            this.logger.error('Failed to generate and send report:', error);
+        }
+    }
+
+    private formatDate(dateString: string): string {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        });
     }
 }
