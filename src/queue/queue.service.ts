@@ -570,4 +570,39 @@ export class QueueService {
             day: '2-digit',
         });
     }
+
+    async resetQueueByLocketId(locketId: number, user: User): Promise<string> {
+        this.logger.info(`Find current queue of locket ${locketId}`);
+
+        const foundUser = await this.prismaService.user.findUnique({
+            where: {
+                id: user.id,
+            },
+        });
+
+        if (!foundUser) {
+            throw new HttpException('Forbidden', 403);
+        }
+
+        const validLocketId: number = this.validationService.validate(
+            QueueValidation.GET,
+            locketId,
+        );
+
+        const locketCount = await this.prismaService.locket.count({
+            where: {
+                id: validLocketId,
+            },
+        });
+
+        if (locketCount == 0) {
+            throw new HttpException('locket not found', 404);
+        }
+
+        const today = this.datesService.getToday();
+        const query = `%${today}%`;
+        await this.prismaService
+            .$queryRaw`DELETE FROM queue WHERE createdAt LIKE ${query} AND locket_id = ${validLocketId}`;
+        return;
+    }
 }

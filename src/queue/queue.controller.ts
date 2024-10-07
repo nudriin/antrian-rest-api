@@ -157,4 +157,17 @@ export class QueueController {
             data: result,
         };
     }
+
+    @Get('/locket/:locketId/reset')
+    @HttpCode(200)
+    async resetQueueByLocketId(
+        @LocketAdmin() locketAdmin: User,
+        @Param('locketId', ParseIntPipe) locketId: number,
+    ): Promise<WebResponse<string>> {
+        await this.queueService.resetQueueByLocketId(locketId, locketAdmin);
+
+        return {
+            data: 'OK',
+        };
+    }
 }

@@ -415,4 +415,37 @@ describe('QueueController', () => {
             expect(response.status).toBe(200);
         });
     });
+
+    describe('GET /api/queue/locket/:locketId/reset', () => {
+        let token: string;
+        beforeEach(async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/users/login')
+                .send({
+                    email: 'test@superadmin.com',
+                    password: 'test',
+                });
+            token = response.body.data.token;
+        });
+
+        it('should reject reset queue if user invalid', async () => {
+            const response = await request(app.getHttpServer())
+                .get(`/api/queue/locket/${122112}/reset`)
+                .set('Authorization', `Bearer ${token + 1}`);
+
+            console.log(response.body);
+            expect(response.status).toBe(401);
+            expect(response.body.errors).toBe('Unauthorized');
+        });
+
+        it('should success reset queue', async () => {
+            const response = await request(app.getHttpServer())
+                .get(`/api/queue/locket/${41}/reset`)
+                .set('Authorization', `Bearer ${token}`);
+
+            console.log(response.body);
+            expect(response.status).toBe(200);
+            expect(response.body.data).toBe('OK');
+        });
+    });
 });
