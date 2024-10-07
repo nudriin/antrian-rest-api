@@ -21,7 +21,7 @@ export class DatabaseBackupService {
     ) {}
 
     // @Cron('*/1 * * * *') // every 1 minutes
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
     async handleDatabaseBackup() {
         try {
             // Dapatkan tanggal untuk nama file
