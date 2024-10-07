@@ -9,6 +9,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AuthMiddleware } from './auth.middleware';
 import { DatesService } from './dates.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { DatabaseBackupService } from './db-backup.service';
+import { EmailService } from './email.service';
 
 @Global()
 @Module({
@@ -23,6 +26,7 @@ import { DatesService } from './dates.service';
         ConfigModule.forRoot({
             isGlobal: true,
         }),
+        ScheduleModule.forRoot(),
     ],
     providers: [
         PrismaService,
@@ -32,8 +36,16 @@ import { DatesService } from './dates.service';
             provide: APP_FILTER,
             useClass: ErrorFilter,
         },
+        DatabaseBackupService,
+        EmailService,
     ],
-    exports: [PrismaService, ValidationService, DatesService],
+    exports: [
+        PrismaService,
+        ValidationService,
+        DatesService,
+        DatabaseBackupService,
+        EmailService,
+    ],
 })
 export class CommonModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
