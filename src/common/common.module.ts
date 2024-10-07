@@ -11,6 +11,7 @@ import { AuthMiddleware } from './auth.middleware';
 import { DatesService } from './dates.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseBackupService } from './db-backup.service';
+import { EmailService } from './email.service';
 
 @Global()
 @Module({
@@ -36,12 +37,14 @@ import { DatabaseBackupService } from './db-backup.service';
             useClass: ErrorFilter,
         },
         DatabaseBackupService,
+        EmailService,
     ],
     exports: [
         PrismaService,
         ValidationService,
         DatesService,
         DatabaseBackupService,
+        EmailService,
     ],
 })
 export class CommonModule implements NestModule {

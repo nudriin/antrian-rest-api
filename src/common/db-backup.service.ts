@@ -6,13 +6,19 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as compress from 'compressing';
 import { ConfigService } from '@nestjs/config';
+import { EmailService } from './email.service';
+import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class DatabaseBackupService {
     private readonly logger = new Logger(DatabaseBackupService.name);
     private readonly execPromise = promisify(exec);
 
-    constructor(private configService: ConfigService) {}
+    constructor(
+        private configService: ConfigService,
+        private emailService: EmailService,
+        private prismaService: PrismaService,
+    ) {}
 
     // @Cron('*/1 * * * *') // every 1 minutes
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -72,6 +78,26 @@ export class DatabaseBackupService {
             fs.unlinkSync(filePath);
 
             this.logger.log(`Database backup berhasil dibuat: ${fileName}.gz`);
+
+            const admins = await this.prismaService.user.findMany({
+                where: {
+                    role: 'SUPER_ADMIN',
+                },
+                select: {
+                    email: true,
+                },
+            });
+
+            if (admins.length !== 0) {
+                // throw new Error('No super admin found in the system');
+                const adminEmails = admins.map((admin) => admin.email);
+                // Send the email
+                await this.emailService.sendBackupEmail(
+                    adminEmails,
+                    compressedFilePath,
+                    date,
+                );
+            }
 
             // Hapus backup yang lebih lama dari 30 hari
             this.cleanOldBackups(backupDir, 30);
