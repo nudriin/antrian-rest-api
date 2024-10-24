@@ -4,6 +4,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { PrismaService } from '../common/prisma.service';
 import {
+    AdminRegisterRequest,
     UserLoginRequest,
     UserRegisterRequest,
     UserResponse,
@@ -12,7 +13,7 @@ import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -138,5 +139,56 @@ export class UserService {
         }
 
         return users;
+    }
+
+    async adminAddUser(
+        user: User,
+        request: AdminRegisterRequest,
+    ): Promise<UserResponse> {
+        this.logger.info(`Register new user ${JSON.stringify(request)}`);
+
+        const validRequest: AdminRegisterRequest =
+            this.validationService.validate(
+                UserValidation.ADMIN_REGISTER,
+                request,
+            ) as AdminRegisterRequest;
+
+        const validUser = await this.prismaService.user.findUnique({
+            where: {
+                id: user.id,
+            },
+        });
+
+        if (!validUser) {
+            throw new HttpException('Unauthorized', 401);
+        }
+
+        const totalUser = await this.prismaService.user.count({
+            where: {
+                email: validRequest.email,
+            },
+        });
+
+        if (totalUser != 0) {
+            throw new HttpException('user is exist', 400);
+        }
+
+        validRequest.password = await bcrypt.hash(validRequest.password, 10);
+
+        const createdUser = await this.prismaService.user.create({
+            data: {
+                name: validRequest.name,
+                email: validRequest.email,
+                password: validRequest.password,
+                role: validRequest.role as Role,
+            },
+        });
+
+        return {
+            id: createdUser.id,
+            email: createdUser.email,
+            name: createdUser.name,
+            role: createdUser.role,
+        };
     }
 }
