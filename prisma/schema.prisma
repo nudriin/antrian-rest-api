@@ -21,6 +21,7 @@ model User {
   role     Role   @default(USER)
 
   Queue Queue[]
+
   @@map("users")
 }
 
@@ -40,7 +41,7 @@ model Queue {
   user_id      Int
 
   locket Locket @relation(fields: [locket_id], references: [id])
-  user User @relation(fields: [user_id], references: [id])
+  user   User   @relation(fields: [user_id], references: [id])
 
   @@map("queue")
 }
@@ -58,4 +59,5 @@ model Locket {
 enum Status {
   DONE
   UNDONE
+  PENDING
 }

@@ -170,4 +170,17 @@ export class QueueController {
             data: 'OK',
         };
     }
+
+    @Patch('/:queueId/pending')
+    @HttpCode(200)
+    async pendingQueue(
+        @LocketAdmin() locketAdmin: User,
+        @Param('queueId', ParseIntPipe) queueId: number,
+    ): Promise<WebResponse<QueueResponse>> {
+        const result = await this.queueService.pendingQueue(queueId);
+
+        return {
+            data: result,
+        };
+    }
 }
