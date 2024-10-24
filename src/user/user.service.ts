@@ -191,4 +191,39 @@ export class UserService {
             role: createdUser.role,
         };
     }
+
+    async removeUser(user: User, userId: number): Promise<string> {
+        const validId = this.validationService.validate(
+            UserValidation.FIND_ID,
+            userId,
+        );
+
+        const validUser = await this.prismaService.user.findUnique({
+            where: {
+                id: user.id,
+            },
+        });
+
+        if (!validUser) {
+            throw new HttpException('Unauthorized', 401);
+        }
+
+        const findUser = await this.prismaService.user.findUnique({
+            where: {
+                id: validId,
+            },
+        });
+
+        if (!findUser) {
+            throw new HttpException('user not found', 404);
+        }
+
+        await this.prismaService.user.delete({
+            where: {
+                id: validId,
+            },
+        });
+
+        return 'OK';
+    }
 }
