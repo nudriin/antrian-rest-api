@@ -91,7 +91,7 @@ export class UserService {
                 role: user.role,
             },
             {
-                expiresIn: '1d',
+                expiresIn: '2d',
                 secret: this.configService.get('JWT_SECRET'),
             },
         );
