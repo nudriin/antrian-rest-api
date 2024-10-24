@@ -32,7 +32,7 @@ export class EmailService {
                 subject: `Database Backup - ${date}`,
                 text: `Database backup untuk ${date} sudah di lampirkan.`,
                 html: `
-                    <h2>Database Backup</h2>
+                    <h2>Database Backup Aplikasi Antri Helu Disdik Kota Palangka Raya</h2>
                     <p>Halo Admin,</p>
                     <p>Database backup untuk tanggal ${date} telah selesai dibuat.</p>
                     <p>File backup terlampir pada email ini.</p>
