@@ -8,6 +8,7 @@ import {
 import { WebResponse } from '../model/web.model';
 import { AuthUser } from '../common/auth-user.decorator';
 import { User } from '@prisma/client';
+import { SuperAdmin } from '../common/super-admin.decorator';
 
 @Controller('/api/users')
 export class UserController {
@@ -42,6 +43,18 @@ export class UserController {
         @AuthUser() user: User,
     ): Promise<WebResponse<UserResponse>> {
         const result = await this.userService.findCurrent(user);
+
+        return {
+            data: result,
+        };
+    }
+
+    @Get()
+    @HttpCode(200)
+    async findAllUser(
+        @SuperAdmin() superAdmin: User,
+    ): Promise<WebResponse<UserResponse[]>> {
+        const result = await this.userService.findAllUsers(superAdmin);
 
         return {
             data: result,

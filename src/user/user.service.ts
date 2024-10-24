@@ -112,4 +112,31 @@ export class UserService {
             role: user.role,
         };
     }
+
+    async findAllUsers(user: User): Promise<UserResponse[]> {
+        const validUser = await this.prismaService.user.findUnique({
+            where: {
+                id: user.id,
+            },
+        });
+
+        if (!validUser) {
+            throw new HttpException('Unauthorized', 401);
+        }
+
+        const users = await this.prismaService.user.findMany({
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+            },
+        });
+
+        if (!users) {
+            throw new HttpException('user not found', 404);
+        }
+
+        return users;
+    }
 }
