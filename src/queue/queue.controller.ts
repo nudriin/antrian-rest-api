@@ -171,6 +171,19 @@ export class QueueController {
         };
     }
 
+    @Get('/all/queue-stats-all-time')
+    @HttpCode(200)
+    async getDailyQueueCountByLocketAllTime(): Promise<
+        WebResponse<QueueStatsByLocketLastMonth>
+    > {
+        const result =
+            await this.queueService.findDailyQueueCountByLocketAllTime();
+
+        return {
+            data: result,
+        };
+    }
+
     @Get('/locket/:locketId/reset')
     @HttpCode(200)
     async resetQueueByLocketId(

@@ -519,6 +519,32 @@ export class QueueService {
         return mappedData;
     }
 
+    async findDailyQueueCountByLocketAllTime(): Promise<QueueStatsByLocketLastMonth> {
+        const data = await this.prismaService.$queryRaw<
+            {
+                locket: string | undefined;
+                date: Date | undefined;
+                count: bigint | null;
+            }[]
+        >`
+            SELECT lk.name AS locket, DATE(que.createdAt) AS date, COUNT(*) AS count
+            FROM queue AS que
+            JOIN lockets AS lk ON (lk.id = que.locket_id)
+            WHERE status = "DONE"
+            GROUP BY locket, DATE(que.createdAt)
+            ORDER BY locket, date ASC
+        `;
+
+        const mappedData = data.reduce((acc, curr) => {
+            const locketName = curr.locket || 'Unknown Locket'; // Handle missing locket names
+            acc[locketName] = acc[locketName] || {};
+            acc[locketName][curr.date.toISOString()] = Number(curr.count); // Use 'id-ID' locale for consistent date formatting
+            return acc;
+        }, {});
+
+        return mappedData;
+    }
+
     // @Cron('*/1 * * * *') // every 1 minutes
     @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
     async autoExportDailyQueueCountByLocketLastMonth() {
