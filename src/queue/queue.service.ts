@@ -424,7 +424,7 @@ export class QueueService {
         >`
         SELECT DATE(createdAt) as date, COUNT(*) as count
         FROM queue
-        WHERE createdAt >= ${startDate} AND createdAt <= ${endDate}
+        WHERE createdAt >= ${startDate} AND createdAt <= ${endDate} AND status = "DONE"
         GROUP BY DATE(createdAt)
         ORDER BY date ASC
         `;
