@@ -94,4 +94,25 @@ export class UserController {
             data: result,
         };
     }
+
+    @Post('/verify/captcha')
+    async verifyCaptcha(@Body() request: any): Promise<WebResponse<any>> {
+        try {
+            console.log(request);
+            const response = await fetch(
+                `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.APP_SECRET_KEY}&response=${request.token}`,
+                {
+                    method: 'POST',
+                },
+            );
+
+            const data = await response.json();
+
+            return {
+                data: data,
+            };
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
